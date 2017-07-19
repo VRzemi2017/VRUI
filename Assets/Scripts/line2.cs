@@ -5,30 +5,46 @@ using UnityEngine;
 public class line2 : MonoBehaviour {
 
     public GameObject player;
-    public GameObject Explosion;
     public GameObject Pointer;
+    public float Angle = 45.0f;
+
     public float initialVelocity = 10.0f;
     public float timeResolution = 0.02f;
     public float MaxTime = 10.0f;
+
     public LayerMask layerMask = -1;
+
     bool NG = false;
     bool NG2 = false;
+    bool NG3 = false;
     bool havePointer = false;
+
     Vector3 Point;
+    Vector3 defaultPos;
+    Quaternion defaultRotation;
+    public float rayDistance;
 
     private GameObject ExplosionInstance;
     private GameObject PointerInstance;
 
     private LineRenderer lineRenderer;
 
-	// Use this for initialization
-	void Start () {
+
+    // Use this for initialization
+    void Start () {
         lineRenderer = GetComponent<LineRenderer>();
+
+        defaultPos = Pointer.transform.localPosition;
+        defaultRotation = Pointer.transform.localRotation;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if(!havePointer) {
+
+        SteamVR_TrackedObject trackedObject = GetComponent<SteamVR_TrackedObject>( );
+        var device = SteamVR_Controller.Input( ( int )trackedObject.index);
+
+        if (!havePointer) {
             PointerInstance = Instantiate(Pointer, Point,Quaternion.Euler(-90,0,0));
             havePointer = true;
         }
@@ -53,6 +69,7 @@ public class line2 : MonoBehaviour {
         int index = 0;
 
         Vector3 currentPosition = transform.position;
+        currentPosition.y = transform.position.y - 0.25f;
 
         for (float t = 0.0f; t < MaxTime; t += timeResolution) {
             lineRenderer.SetPosition(index, currentPosition);
@@ -64,10 +81,19 @@ public class line2 : MonoBehaviour {
                 lineRenderer.SetVertexCount(index + 2);
 
                 lineRenderer.SetPosition(index + 1, hit.point);
-                if ( Input.GetMouseButtonDown( 0 ) && NG == false ) {
+
+                if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && NG == false ) {
                     player.transform.position = hit.point;
                 }
                 Point = hit.point;
+
+                PointerInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
+                if ( Vector3.Angle( hit.normal, Vector3.up ) >= Angle ) {
+                    NG3 = true;
+                } else {
+                    NG3 = false;
+                }
+
                 Point.y = hit.point.y + 0.01f;
                 NG2 = false;
                 break;
@@ -83,17 +109,16 @@ public class line2 : MonoBehaviour {
 
         Ray ray = new Ray(Point, Vector3.down);
         RaycastHit hit2;
-        if (Physics.Raycast(ray, out hit2))
-        {
+        if (Physics.Raycast(ray, out hit2)) {
             Debug.Log(hit2.point);
             Debug.DrawLine(Point, hit2.point, Color.red);
-            if (hit2.distance > 1f || hit2.collider.tag == "unstand" || NG2)
-            {
+            if (hit2.distance > 1f || hit2.collider.tag == "unstand" || NG2 || NG3) {
                 NG = true;
-            } else
-            {
+            } else {
                 NG = false;
             }
         }
+
+
     }
 }
