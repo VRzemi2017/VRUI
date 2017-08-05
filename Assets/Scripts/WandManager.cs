@@ -19,12 +19,6 @@ public class WandManager : MonoBehaviour {
 
     public WAND_STATE STATE { get { return m_Wand.GetComponent<WandController>().STATE; } }
     public int GEM_NUM { get { return m_gem_num; } }
-
-    // Use this for initialization
-    void Awake ( ) {
-       
-
-    }
 	
 	// Update is called once per frame
 	void Update ( ) {

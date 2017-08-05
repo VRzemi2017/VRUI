@@ -12,11 +12,7 @@ public class WandController : MonoBehaviour {
 
     public WandManager.WAND_STATE STATE { get { return m_state; } }
     public bool IsGetGem { get { return m_is_get_gem; } }
-    // Use this for initialization
-    void Start ( ) {
-		
-	}
-	
+
 	// Update is called once per frame
 	void Update ( ) {
         //毎フレーム最初にステートを変える

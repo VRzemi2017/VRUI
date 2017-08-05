@@ -16,7 +16,7 @@ public class GemController : MonoBehaviour {
 
     public void Start ( ) {
         m_Gem.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[0] );
-        m_LineRenderer.GetComponent<Renderer>().material.SetColor("_EmissionColor", m_GemColor[0]);
+        m_LineRenderer.GetComponent<Renderer>().material.SetColor( "_EmissionColor", m_GemColor[0] );
     }
 
     public void Update ( ) {
@@ -30,15 +30,15 @@ public class GemController : MonoBehaviour {
         gem.transform.SetParent( m_SmallGemParent, false );
         m_SmallGemList.Add( gem );
         for ( int i = 0; i < m_SmallGemList.Count; i++ ) {
-            Vector3 position = Quaternion.Euler(0, 0, (360 / m_SmallGemList.Count) * i) * m_SmallGemLenght;
+            Vector3 position = Quaternion.Euler(0, 0, ( 360 / m_SmallGemList.Count) * i ) * m_SmallGemLenght;
             m_SmallGemList[i].transform.localPosition = position;
         }
 
         if ( gem_num > m_GemColor.Count ) {
             return;
         }
-        m_Gem.GetComponent<Renderer>( ).material.SetColor("_EmissionColor", m_GemColor[gem_num]);
-        m_LineRenderer.GetComponent<Renderer>( ).material.SetColor("_EmissionColor", m_GemColor[gem_num]);
+        m_Gem.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[gem_num] );
+        m_LineRenderer.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[gem_num] );
     }
 
 }
