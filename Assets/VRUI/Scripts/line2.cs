@@ -11,6 +11,9 @@ public class line2 : MonoBehaviour {
     [SerializeField] float initialVelocity = 10.0f;
     [SerializeField] float timeResolution = 0.02f;
     [SerializeField] float MaxTime = 10.0f;
+    [SerializeField] float LineLegth = 5.0f;
+    [SerializeField] Vector3 PositionDiff;
+    [SerializeField] SteamVR_TrackedObject TrackedObject;
 
     [SerializeField] LayerMask layerMask = -1;
 
@@ -30,22 +33,23 @@ public class line2 : MonoBehaviour {
     public bool IsWarpInput { get { return isWarpInput; } }
 
 
-    void Start( ) {
+    void Start() {
         lineRenderer = GetComponent<LineRenderer>();
     }
-    
-    void Update( ) {
+
+    void Update() {
         //update毎にリセットする物はここに書く
-        ResetState( );
+        ResetState();
+        Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized) + TrackedObject.transform.position;
+
         //VRコントローラの処理
-        SteamVR_TrackedObject trackedObject = GetComponent<SteamVR_TrackedObject>();
-        var device = SteamVR_Controller.Input((int)trackedObject.index);
+        var device = SteamVR_Controller.Input((int)TrackedObject.index);
 
         //放物線とTargetの処理
         int index = 0;
 
-        Vector3 velocityVector = transform.forward * initialVelocity;
-        Vector3 currentPosition = transform.position;
+        Vector3 velocityVector = TrackedObject.transform.forward * initialVelocity;
+        Vector3 currentPosition = postion;
 
         if (!havePointer) {
             PointerInstance = Instantiate(Pointer, Point, Quaternion.Euler(-90, 0, 0));
@@ -56,15 +60,20 @@ public class line2 : MonoBehaviour {
 
         lineRenderer.SetVertexCount((int)(MaxTime / timeResolution));
 
-        currentPosition.y = transform.position.y - 0.01f;
+        currentPosition.y = postion.y - 0.01f;
 
+        float nowLineLength = 0.0f;
         for (float t = 0.0f; t < MaxTime; t += timeResolution) {
 
             lineRenderer.SetPosition(index, currentPosition);
-
+           /* if (nowLineLength > LineLegth) {
+                lineRenderer.SetVertexCount(index + 2);
+                lineRenderer.SetPosition(index + 1, currentPosition);
+                break;
+            }*/
             RaycastHit hit;
 
-            if (Physics.Raycast(currentPosition, velocityVector, out hit, velocityVector.magnitude, layerMask)) {
+            if (Physics.Raycast(currentPosition, velocityVector, out hit, velocityVector.magnitude * timeResolution, layerMask)) {
 
                 lineRenderer.SetVertexCount(index + 2);
 
@@ -91,41 +100,43 @@ public class line2 : MonoBehaviour {
                 break;
 
             } else {
-
                 NG2 = true;
-
             }
 
             //物体を投げるの放物線重力シミュレーション
             currentPosition += velocityVector * timeResolution;
             velocityVector += Physics.gravity * timeResolution;
             index++;
+            //nowLineLength += ;
+
+
         }
 
-        //放物線の色とTargetの表示
-        if (ProjectileColor_judge == true) {
-            GetComponent<Renderer>().material.color = Color.red;
-            PointerInstance.SetActive(false);
-        } else {
-            GetComponent<Renderer>().material.color = Color.green;
-            PointerInstance.SetActive(true);
-        }
 
-        //Tagの判断
-        Ray ray = new Ray(Point, Vector3.down);
+        //Targetの判断
+        ProjectileColor_judge = ColliderTag(Point);
+
+    }
+
+    private void ResetState() {
+        isWarpInput = false;
+    }
+
+    private bool ColliderTag(Vector3 point) {
+        Ray ray = new Ray(point, Vector3.down);
         RaycastHit hit2;
         if (Physics.Raycast(ray, out hit2)) {
             Debug.Log(hit2.point);
             Debug.DrawLine(Point, hit2.point, Color.red);
             if (hit2.distance > 1f || hit2.collider.tag == "unstand" || NG2 == true || GroundAngle_judge == true) {
-                ProjectileColor_judge = true;
+                PointerInstance.SetActive(false);
+                return true;
             } else {
-                ProjectileColor_judge = false;
+                PointerInstance.SetActive(true);
+                return false;
             }
         }
+        return false;
     }
 
-    private void ResetState ( ) {
-        isWarpInput = false;
-    }
 }
