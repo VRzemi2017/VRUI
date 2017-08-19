@@ -13,6 +13,7 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField] float MaxTime = 10.0f;  //線の長さ
     [SerializeField] Vector3 PositionDiff;
     [SerializeField] LayerMask layerMask = -1;
+    [SerializeField] GameObject ControllerRatation;
 
     bool ProjectileColor_judge = false; //放物線の色判断
     bool TargetSetActive = false;
