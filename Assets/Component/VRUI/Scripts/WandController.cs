@@ -31,7 +31,6 @@ public class WandController : MonoBehaviour {
                 break;
         }
     }
-
     private void ChageWandState ( ) {
         m_wand_state = WandManager.WAND_STATE.IDEL;
         if ( m_Line.IsWarpInput ) {
@@ -48,6 +47,8 @@ public class WandController : MonoBehaviour {
             m_player_state = WandManager.PLAYER_STATE.DAMAGE;
             m_is_hit_enemy = false;
         }
-
+    }
+    public void SetBehaviorActive(bool active) {
+        m_Line.enabled = active;
     }
 }
