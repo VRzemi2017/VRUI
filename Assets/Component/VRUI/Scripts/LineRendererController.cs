@@ -15,7 +15,7 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField] float Curvature = 0.9f;
     [SerializeField] Vector3 PositionDiff;
     [SerializeField] LayerMask layerMask = -1;
-    [SerializeField] GameObject GetControllerRotation;
+    GameObject GetControllerRotation;
 
     bool ProjectileColor_judge = false; //放物線の色判断
     bool TargetSetActive = false;
@@ -149,7 +149,10 @@ public class LineRendererController : MonoBehaviour {
     }
 
     public void DeleteLine() {
-        lineRenderer.positionCount = 0;
+        if ( lineRenderer ) 
+        {
+            lineRenderer.positionCount = 0;
+        }
     }
 
     public void DeleteTarget() {
