@@ -5,7 +5,7 @@ using UnityEngine;
 public class LineRendererController : MonoBehaviour {
 
     SteamVR_ControllerManager player;
-    //[SerializeField] GameObject Pointer; //移動位置のTarget
+    [SerializeField] GameObject Pointer; //移動位置のTarget
     [SerializeField] float GroundAngle = 30.0f; //角度
 
     [SerializeField] float initialVelocity = 10.0f; //力
@@ -91,7 +91,7 @@ public class LineRendererController : MonoBehaviour {
                 }
 
                 Point = hit.point;
-                Point.y = hit.point.y + 0.01f;
+                Point.y = hit.point.y + 0.05f;
 
                 TargetSetActive = false;
                 break;
