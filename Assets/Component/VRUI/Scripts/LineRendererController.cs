@@ -148,4 +148,12 @@ public class LineRendererController : MonoBehaviour {
         return false;
     }
 
+    public void DeleteLine() {
+        lineRenderer.positionCount = 0;
+    }
+
+    public void DeleteTarget() {
+        Destroy(PointerInstance);
+    }
+
 }
