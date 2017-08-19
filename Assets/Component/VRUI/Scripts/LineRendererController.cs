@@ -5,18 +5,17 @@ using UnityEngine;
 public class LineRendererController : MonoBehaviour {
 
     SteamVR_ControllerManager player;
-    [SerializeField] GameObject Pointer; //移動位置のTarget
+    //[SerializeField] GameObject Pointer; //移動位置のTarget
     [SerializeField] float GroundAngle = 30.0f; //角度
 
-    [SerializeField] float initialVelocity = 10.0f;
-    [SerializeField] float timeResolution = 0.02f;
-    [SerializeField] float MaxTime = 10.0f;
-    //[SerializeField] float LineLegth = 5.0f;
+    [SerializeField] float initialVelocity = 10.0f; //力
+    [SerializeField] float timeResolution = 0.02f;  //点と点の距離
+    [SerializeField] float MaxTime = 10.0f;  //線の長さ
     [SerializeField] Vector3 PositionDiff;
     [SerializeField] LayerMask layerMask = -1;
 
     bool ProjectileColor_judge = false; //放物線の色判断
-    bool NG2 = false;
+    bool TargetSetActive = false;
     bool GroundAngle_judge = false; //地形角度の判断
     bool havePointer = false;
     bool isWarpInput = false;
@@ -30,6 +29,7 @@ public class LineRendererController : MonoBehaviour {
     public Vector3 TargetPoint { get { return Point; } }
     public bool IsWarpInput { get { return isWarpInput; } }
 
+
     void Start() {
         lineRenderer = GetComponent<LineRenderer>();
         player = GameObject.FindObjectOfType<SteamVR_ControllerManager>( );
@@ -39,7 +39,7 @@ public class LineRendererController : MonoBehaviour {
     void Update() {
         //update毎にリセットする物はここに書く
         ResetState();
-        Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized) + TrackedObject.transform.position;
+        Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
 
         //VRコントローラの処理
         var device = SteamVR_Controller.Input((int)TrackedObject.index);
@@ -51,30 +51,28 @@ public class LineRendererController : MonoBehaviour {
         Vector3 currentPosition = postion;
 
         if (!havePointer) {
-            PointerInstance = Instantiate(Pointer, Point, Quaternion.identity);
+            PointerInstance = Instantiate( Pointer, Point, Quaternion.identity);
             havePointer = true;
         }
 
         PointerInstance.transform.position = Point;
 
-        lineRenderer.SetVertexCount((int)(MaxTime / timeResolution));
+        lineRenderer.positionCount = (int)(MaxTime / timeResolution);
 
         currentPosition.y = postion.y - 0.01f;
 
         //float nowLineLength = 0.0f;
         for (float t = 0.0f; t < MaxTime; t += timeResolution) {
 
-            lineRenderer.SetPosition(index, currentPosition);
-           /* if (nowLineLength > LineLegth) {
-                lineRenderer.SetVertexCount(index + 2);
-                lineRenderer.SetPosition(index + 1, currentPosition);
-                break;
-            }*/
+            if ( index < lineRenderer.positionCount ) {
+                lineRenderer.SetPosition(index, currentPosition);
+            }
+
             RaycastHit hit;
 
             if (Physics.Raycast(currentPosition, velocityVector, out hit, velocityVector.magnitude * timeResolution, layerMask)) {
 
-                lineRenderer.SetVertexCount(index + 2);
+                lineRenderer.positionCount = index + 2;
 
                 lineRenderer.SetPosition(index + 1, hit.point);
 
@@ -95,18 +93,23 @@ public class LineRendererController : MonoBehaviour {
                 Point = hit.point;
                 Point.y = hit.point.y + 0.01f;
 
-                NG2 = false;
+                TargetSetActive = false;
                 break;
 
             } else {
-                NG2 = true;
+                TargetSetActive = true;
             }
 
             //物体を投げるの放物線重力シミュレーション
             currentPosition += velocityVector * timeResolution;
             velocityVector += Physics.gravity * timeResolution;
             index++;
-            //nowLineLength += ;
+
+            if ( index >= ( int )( MaxTime / timeResolution ) ) {
+                index -= 2;
+            }
+
+            Debug.Log( index );
 
         }
 
@@ -123,9 +126,7 @@ public class LineRendererController : MonoBehaviour {
         Ray ray = new Ray(point, Vector3.down);
         RaycastHit hit2;
         if (Physics.Raycast(ray, out hit2)) {
-            Debug.Log(hit2.point);
-            Debug.DrawLine(Point, hit2.point, Color.red);
-            if (hit2.distance > 1f || hit2.collider.tag == "unstand" || NG2 == true || GroundAngle_judge == true) {
+            if (hit2.distance > 1f || TargetSetActive == true || GroundAngle_judge == true) {
                 PointerInstance.SetActive(false);
                 return true;
             } else {
