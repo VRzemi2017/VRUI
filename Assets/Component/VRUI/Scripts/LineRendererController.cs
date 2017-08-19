@@ -61,30 +61,29 @@ public class LineRendererController : MonoBehaviour {
 
         currentPosition.y = postion.y - 0.01f;
 
-        //float nowLineLength = 0.0f;
-        for (float t = 0.0f; t < MaxTime; t += timeResolution) {
+        for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
 
             if ( index < lineRenderer.positionCount ) {
-                lineRenderer.SetPosition(index, currentPosition);
+                lineRenderer.SetPosition( index, currentPosition );
             }
 
             RaycastHit hit;
 
-            if (Physics.Raycast(currentPosition, velocityVector, out hit, velocityVector.magnitude * timeResolution, layerMask)) {
+            if ( Physics.Raycast( currentPosition, velocityVector, out hit, velocityVector.magnitude * timeResolution, layerMask ) ) {
 
                 lineRenderer.positionCount = index + 2;
 
-                lineRenderer.SetPosition(index + 1, hit.point);
+                lineRenderer.SetPosition( index + 1, hit.point );
 
                 //VRコントローラの処理
-                if (device.GetTouchDown(SteamVR_Controller.ButtonMask.Trigger) && ProjectileColor_judge == false) {
+                if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && ProjectileColor_judge == false ) {
                     player.transform.position = hit.point;
                     isWarpInput = true;
                 }
 
                 //角度の判断
-                PointerInstance.transform.rotation = Quaternion.LookRotation(hit.normal);
-                if (Vector3.Angle(hit.normal, Vector3.up) >= GroundAngle) {
+                PointerInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
+                if ( Vector3.Angle( hit.normal, Vector3.up ) >= GroundAngle ) {
                     GroundAngle_judge = true;
                 } else {
                     GroundAngle_judge = false;
@@ -103,13 +102,14 @@ public class LineRendererController : MonoBehaviour {
             //物体を投げるの放物線重力シミュレーション
             currentPosition += velocityVector * timeResolution;
             velocityVector += Physics.gravity * timeResolution;
+            if ( index >= 15 ) {
+                velocityVector *= 0.9f;
+            }
             index++;
-
+            //Debug.Log( velocityVector );
             if ( index >= ( int )( MaxTime / timeResolution ) ) {
                 index -= 2;
             }
-
-            Debug.Log( index );
 
         }
 
