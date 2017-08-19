@@ -11,9 +11,11 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField] float initialVelocity = 10.0f; //力
     [SerializeField] float timeResolution = 0.02f;  //点と点の距離
     [SerializeField] float MaxTime = 10.0f;  //線の長さ
+    [SerializeField] int RelayPoint = 15;
+    [SerializeField] float Curvature = 0.9f;
     [SerializeField] Vector3 PositionDiff;
     [SerializeField] LayerMask layerMask = -1;
-    [SerializeField] GameObject ControllerRatation;
+    [SerializeField] GameObject GetControllerRotation;
 
     bool ProjectileColor_judge = false; //放物線の色判断
     bool TargetSetActive = false;
@@ -35,11 +37,15 @@ public class LineRendererController : MonoBehaviour {
         lineRenderer = GetComponent<LineRenderer>();
         player = GameObject.FindObjectOfType<SteamVR_ControllerManager>( );
         TrackedObject = player.right.GetComponent<SteamVR_TrackedObject>( );
+        GetControllerRotation = GameObject.Find( "Controller (right)" );
     }
 
     void Update() {
         //update毎にリセットする物はここに書く
         ResetState();
+        Quaternion ControllerRotation = GetControllerRotation.transform.rotation;
+
+
         Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
 
         //VRコントローラの処理
@@ -61,6 +67,8 @@ public class LineRendererController : MonoBehaviour {
         lineRenderer.positionCount = (int)(MaxTime / timeResolution);
 
         currentPosition.y = postion.y - 0.01f;
+
+        //ControllerVariables.Normalize();
 
         for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
 
@@ -102,9 +110,11 @@ public class LineRendererController : MonoBehaviour {
 
             //物体を投げるの放物線重力シミュレーション
             currentPosition += velocityVector * timeResolution;
-            velocityVector += Physics.gravity * timeResolution;
-            if ( index >= 15 ) {
-                velocityVector *= 0.9f;
+            
+            velocityVector += ControllerRotation * Physics.gravity * timeResolution;
+
+            if ( index >= RelayPoint ) {
+                velocityVector *= Curvature;
             }
             index++;
             //Debug.Log( velocityVector );
