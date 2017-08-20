@@ -37,7 +37,7 @@ public class LineRendererController : MonoBehaviour {
         lineRenderer = GetComponent<LineRenderer>();
         player = GameObject.FindObjectOfType<SteamVR_ControllerManager>( );
         TrackedObject = player.right.GetComponent<SteamVR_TrackedObject>( );
-        GetControllerRotation = GameObject.Find( "Controller (right)" );
+        GetControllerRotation = TrackedObject.gameObject;
     }
 
     void Update() {
