@@ -8,6 +8,8 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField]
     GameObject Pointer; //移動位置のTarget
     [SerializeField]
+    GameObject MoveTarget;
+    [SerializeField]
     float GroundAngle = 30.0f; //角度
 
     [SerializeField]
@@ -21,7 +23,7 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField]
     float Curvature = 0.9f; //キャンバ
     [SerializeField]
-    float Delay = 1.0f;
+    float Delay = 1.0f; //転移時間
 
     [SerializeField]
     Vector3 PositionDiff;
@@ -32,9 +34,9 @@ public class LineRendererController : MonoBehaviour {
 
     GameObject GetControllerRotation;
 
-    bool Move = false;
+    bool Move = false;　//時間判断
     bool Projectile_judge = false; //放物線判断
-    bool TargetSetActive = false;
+    bool TargetSetActive = false; //Target表示判断
     bool GroundAngle_judge = false; //地形角度の判断
     bool havePointer = false;
     bool isWarpInput = false;
@@ -43,6 +45,7 @@ public class LineRendererController : MonoBehaviour {
     Vector3 GetPosition;
 
     private GameObject PointerInstance;
+    private GameObject MoveTargetInstance;
     private LineRenderer lineRenderer;
     private SteamVR_TrackedObject TrackedObject;
 
@@ -58,23 +61,24 @@ public class LineRendererController : MonoBehaviour {
     }
 
     void Update() {
+
         //update毎にリセットする物はここに書く
         ResetState();
         Quaternion ControllerRotation = GetControllerRotation.transform.rotation;
-
 
         Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
 
         //VRコントローラの処理
         var device = SteamVR_Controller.Input((int)TrackedObject.index);
 
-        //放物線とTargetの処理
+        //線とTargetの処理
         int index = 0;
 
         Vector3 velocityVector = TrackedObject.transform.forward * initialVelocity;
         Vector3 currentPosition = postion;
 
-        if (!havePointer) {
+        //Target生成処理
+        if ( !havePointer) {
             PointerInstance = Instantiate( Pointer, Point, Quaternion.identity);
             havePointer = true;
         }
@@ -84,8 +88,6 @@ public class LineRendererController : MonoBehaviour {
         lineRenderer.positionCount = (int)(MaxTime / timeResolution);
 
         currentPosition.y = postion.y - 0.01f;
-
-        //ControllerVariables.Normalize();
 
         for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
 
@@ -105,6 +107,10 @@ public class LineRendererController : MonoBehaviour {
                 //VRコントローラの処理
                 if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
                     GetPosition = hit.point;
+                    if ( Move == false ) {
+                        MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 1.3f, GetPosition.z ), Quaternion.identity );
+                        MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
+                    }
                     TimeDel( );
                 }
 
@@ -141,6 +147,7 @@ public class LineRendererController : MonoBehaviour {
 
         }
 
+        //転移処理
         if ( Move ) {
             DelTime += Time.deltaTime;
 
@@ -153,7 +160,7 @@ public class LineRendererController : MonoBehaviour {
         }
         //Targetの判断
         Projectile_judge = ColliderTag(Point);
-
+        
     }
 
     private void TimeDel( ) {
