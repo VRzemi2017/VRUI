@@ -5,25 +5,42 @@ using UnityEngine;
 public class LineRendererController : MonoBehaviour {
 
     SteamVR_ControllerManager player;
-    [SerializeField] GameObject Pointer; //移動位置のTarget
-    [SerializeField] float GroundAngle = 30.0f; //角度
+    [SerializeField]
+    GameObject Pointer; //移動位置のTarget
+    [SerializeField]
+    float GroundAngle = 30.0f; //角度
 
-    [SerializeField] float initialVelocity = 10.0f; //力
-    [SerializeField] float timeResolution = 0.02f;  //点と点の距離
-    [SerializeField] float MaxTime = 10.0f;  //線の長さ
-    [SerializeField] int RelayPoint = 15;
-    [SerializeField] float Curvature = 0.9f;
-    [SerializeField] Vector3 PositionDiff;
-    [SerializeField] LayerMask layerMask = -1;
+    [SerializeField]
+    float initialVelocity = 10.0f; //力
+    [SerializeField]
+    float timeResolution = 0.02f;  //点と点の距離
+    [SerializeField]
+    float MaxTime = 10.0f;  //線の長さ
+    [SerializeField]
+    int RelayPoint = 15; //中継点
+    [SerializeField]
+    float Curvature = 0.9f; //キャンバ
+    [SerializeField]
+    float Delay = 1.0f;
+
+    [SerializeField]
+    Vector3 PositionDiff;
+    [SerializeField]
+    LayerMask layerMask = -1;
+
+    float DelTime = 0.0f;
+
     GameObject GetControllerRotation;
 
-    bool ProjectileColor_judge = false; //放物線の色判断
+    bool Move = false;
+    bool Projectile_judge = false; //放物線判断
     bool TargetSetActive = false;
     bool GroundAngle_judge = false; //地形角度の判断
     bool havePointer = false;
     bool isWarpInput = false;
 
     Vector3 Point;
+    Vector3 GetPosition;
 
     private GameObject PointerInstance;
     private LineRenderer lineRenderer;
@@ -84,10 +101,11 @@ public class LineRendererController : MonoBehaviour {
 
                 lineRenderer.SetPosition( index + 1, hit.point );
 
+                
                 //VRコントローラの処理
-                if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && ProjectileColor_judge == false ) {
-                    player.transform.position = hit.point;
-                    isWarpInput = true;
+                if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
+                    GetPosition = hit.point;
+                    TimeDel( );
                 }
 
                 //角度の判断
@@ -108,7 +126,7 @@ public class LineRendererController : MonoBehaviour {
                 TargetSetActive = true;
             }
 
-            //物体を投げるの放物線重力シミュレーション
+            //キャンバシミュレーション
             currentPosition += velocityVector * timeResolution;
             
             velocityVector += ControllerRotation * Physics.gravity * timeResolution;
@@ -117,19 +135,33 @@ public class LineRendererController : MonoBehaviour {
                 velocityVector *= Curvature;
             }
             index++;
-            //Debug.Log( velocityVector );
-            if ( index >= ( int )( MaxTime / timeResolution ) ) {
+            if ( index >= lineRenderer.positionCount ) {
                 index -= 2;
             }
 
         }
 
+        if ( Move ) {
+
+            DelTime += Time.deltaTime;
+
+            if ( DelTime >= Delay ) {
+                player.transform.position = GetPosition;
+                isWarpInput = true;
+                DelTime = 0.0f;
+                Move = false;
+            }
+        }
         //Targetの判断
-        ProjectileColor_judge = ColliderTag(Point);
+        Projectile_judge = ColliderTag(Point);
 
     }
 
-    private void ResetState() {
+    private void TimeDel( ) {
+            Move = true;
+    }
+
+    private void ResetState( ) {
         isWarpInput = false;
     }
 
@@ -149,8 +181,7 @@ public class LineRendererController : MonoBehaviour {
     }
 
     public void DeleteLine() {
-        if ( lineRenderer ) 
-        {
+        if ( lineRenderer ) {
             lineRenderer.positionCount = 0;
         }
     }
