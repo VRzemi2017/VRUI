@@ -142,7 +142,6 @@ public class LineRendererController : MonoBehaviour {
         }
 
         if ( Move ) {
-
             DelTime += Time.deltaTime;
 
             if ( DelTime >= Delay ) {
