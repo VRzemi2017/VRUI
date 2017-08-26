@@ -7,8 +7,7 @@ public class LineRendererController : MonoBehaviour {
     SteamVR_ControllerManager player;
     [SerializeField]
     GameObject Pointer; //移動位置のTarget
-    [SerializeField]
-    GameObject MoveTarget;
+    //[SerializeField] GameObject MoveTarget;
     [SerializeField]
     float GroundAngle = 30.0f; //角度
 
@@ -33,6 +32,7 @@ public class LineRendererController : MonoBehaviour {
     float DelTime = 0.0f;
 
     GameObject GetControllerRotation;
+    GameObject EyeObject;
 
     bool Move = false;　//時間判断
     bool Projectile_judge = false; //放物線判断
@@ -58,6 +58,7 @@ public class LineRendererController : MonoBehaviour {
         player = GameObject.FindObjectOfType<SteamVR_ControllerManager>( );
         TrackedObject = player.right.GetComponent<SteamVR_TrackedObject>( );
         GetControllerRotation = GameObject.Find( "Controller (right)" );
+        EyeObject = GameObject.Find( "Camera (eye)" );
     }
 
     void Update() {
@@ -67,6 +68,7 @@ public class LineRendererController : MonoBehaviour {
         Quaternion ControllerRotation = GetControllerRotation.transform.rotation;
 
         Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
+        Vector3 CameraEyePosition = EyeObject.transform.localPosition;
 
         //VRコントローラの処理
         var device = SteamVR_Controller.Input((int)TrackedObject.index);
@@ -106,11 +108,13 @@ public class LineRendererController : MonoBehaviour {
                 
                 //VRコントローラの処理
                 if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
-                    GetPosition = hit.point;
-                    if ( Move == false ) {
+
+                    GetPosition = Point;
+
+                    /*if ( Move == false ) {
                         MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 1.3f, GetPosition.z ), Quaternion.identity );
                         MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
-                    }
+                    }*/
                     TimeDel( );
                 }
 
@@ -152,10 +156,13 @@ public class LineRendererController : MonoBehaviour {
             DelTime += Time.deltaTime;
 
             if ( DelTime >= Delay ) {
-                player.transform.position = GetPosition;
+
+                player.transform.position = GetPosition + CameraEyePosition;
+                
                 isWarpInput = true;
                 DelTime = 0.0f;
                 Move = false;
+
             }
         }
         //Targetの判断
