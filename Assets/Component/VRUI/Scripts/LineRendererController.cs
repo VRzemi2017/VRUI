@@ -7,13 +7,13 @@ public class LineRendererController : MonoBehaviour {
     SteamVR_ControllerManager player;
     [SerializeField]
     GameObject Pointer; //移動位置のTarget
-    //[SerializeField] GameObject MoveTarget;
+    [SerializeField] GameObject MoveTarget;
     [SerializeField]
     float GroundAngle = 30.0f; //角度
 
     [SerializeField]
-    float initialVelocity = 10.0f; //力
-    [SerializeField]
+    float initialVelocity = 15.0f;
+    [ SerializeField]
     float timeResolution = 0.02f;  //点と点の距離
     [SerializeField]
     float MaxTime = 10.0f;  //線の長さ
@@ -105,16 +105,15 @@ public class LineRendererController : MonoBehaviour {
 
                 lineRenderer.SetPosition( index + 1, hit.point );
 
-                
+
                 //VRコントローラの処理
                 if ( device.GetTouchDown( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
 
                     GetPosition = Point;
-
-                    /*if ( Move == false ) {
-                        MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 1.3f, GetPosition.z ), Quaternion.identity );
+                    if ( Move == false ) {
+                        MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 0.1f, GetPosition.z ), Quaternion.identity );
                         MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
-                    }*/
+                    }
                     TimeDel( );
                 }
 
@@ -156,13 +155,10 @@ public class LineRendererController : MonoBehaviour {
             DelTime += Time.deltaTime;
 
             if ( DelTime >= Delay ) {
-
                 player.transform.position = GetPosition + CameraEyePosition;
-                
                 isWarpInput = true;
                 DelTime = 0.0f;
                 Move = false;
-
             }
         }
         //Targetの判断
