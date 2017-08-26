@@ -51,7 +51,7 @@ public class WandController : MonoBehaviour {
     public void SetBehaviorActive(bool active) {
         if (!active) {
             m_Line.DeleteLine();
-            m_Line.DeleteTarget();
+            //m_Line.DeleteTarget();
         }
         m_Line.enabled = active;
     }

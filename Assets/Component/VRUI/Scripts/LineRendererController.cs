@@ -38,11 +38,11 @@ public class LineRendererController : MonoBehaviour {
     bool Projectile_judge = false; //放物線判断
     bool TargetSetActive = false; //Target表示判断
     bool GroundAngle_judge = false; //地形角度の判断
-    bool havePointer = false;
     bool isWarpInput = false;
 
     Vector3 Point;
     Vector3 GetPosition;
+    float gravity_add;
 
     private GameObject PointerInstance;
     private GameObject MoveTargetInstance;
@@ -54,11 +54,14 @@ public class LineRendererController : MonoBehaviour {
 
 
     void Start() {
+
         lineRenderer = GetComponent<LineRenderer>();
         player = GameObject.FindObjectOfType<SteamVR_ControllerManager>( );
         TrackedObject = player.right.GetComponent<SteamVR_TrackedObject>( );
         GetControllerRotation = GameObject.Find( "Controller (right)" );
         EyeObject = GameObject.Find( "Camera (eye)" );
+
+        PointerInstance = Instantiate( Pointer, Point, Quaternion.identity );
     }
 
     void Update() {
@@ -79,17 +82,13 @@ public class LineRendererController : MonoBehaviour {
         Vector3 velocityVector = TrackedObject.transform.forward * initialVelocity;
         Vector3 currentPosition = postion;
 
-        //Target生成処理
-        if ( !havePointer) {
-            PointerInstance = Instantiate( Pointer, Point, Quaternion.identity);
-            havePointer = true;
-        }
-
         PointerInstance.transform.position = Point;
 
         lineRenderer.positionCount = (int)(MaxTime / timeResolution);
 
         currentPosition.y = postion.y - 0.01f;
+
+
 
         for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
 
@@ -135,10 +134,16 @@ public class LineRendererController : MonoBehaviour {
                 TargetSetActive = true;
             }
 
+
             //キャンバシミュレーション
             currentPosition += velocityVector * timeResolution;
-            
-            velocityVector += ControllerRotation * Physics.gravity * timeResolution;
+            if ( ControllerRotation.eulerAngles.x <= 180 ) {
+                gravity_add = ControllerRotation.eulerAngles.x / 5;
+            } else {
+                gravity_add = 0f;
+            }
+            Debug.Log( Physics.gravity + new Vector3 (0, gravity_add, 0) );
+            velocityVector += ControllerRotation * (Physics.gravity + new Vector3 (0, gravity_add, 0) ) * timeResolution;
 
             if ( index >= RelayPoint ) {
                 velocityVector *= Curvature;
@@ -149,6 +154,9 @@ public class LineRendererController : MonoBehaviour {
             }
 
         }
+
+
+
 
         //転移処理
         if ( Move ) {
@@ -195,8 +203,8 @@ public class LineRendererController : MonoBehaviour {
         }
     }
 
-    public void DeleteTarget() {
-        Destroy(PointerInstance);
-    }
+    /*public void DeleteTarget() {
+        PointerInstance.SetActive( false );
+    }*/
 
 }
