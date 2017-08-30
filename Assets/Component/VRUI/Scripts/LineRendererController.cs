@@ -182,7 +182,7 @@ public class LineRendererController : MonoBehaviour {
             PointerInstance.SetActive( false );
 
             if ( DelTime >= Delay ) {
-                player.transform.position = GetPosition + CameraEyePosition;
+                player.transform.position = GetPosition - new Vector3 (CameraEyePosition.x, 0, CameraEyePosition.z);
                 isWarpInput = true;
                 DelTime = 0.0f;
                 Move = false;
@@ -190,7 +190,7 @@ public class LineRendererController : MonoBehaviour {
         }
         //Targetの判断
         Projectile_judge = ColliderTag(Point);
-        
+        Debug.Log( GetPosition );
     }
 
     private void TimeDel( ) {
