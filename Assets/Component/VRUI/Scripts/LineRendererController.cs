@@ -31,11 +31,6 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField]
     LayerMask layerMask = -1;
 
-    [SerializeField]
-    Color c1 = new Color( 1, 1, 1, 0 );
-    [SerializeField]
-    Color c2 = new Color( 255, 255, 255, 255 );
-
     float DelTime = 0.0f;
 
     GameObject GetControllerRotation;
@@ -169,7 +164,7 @@ public class LineRendererController : MonoBehaviour {
 
         //TIME初期化
         if ( device.GetTouchUp( SteamVR_Controller.ButtonMask.Trigger ) ) {
-            lineRenderer.material.color = new Color( 255, 255, 255, 255 );
+            lineRenderer.material.color = new Color( 255, 255, 255, 100 );
             DelTime = 0f;
             Move = false;
             Destroy( MoveTargetInstance );
