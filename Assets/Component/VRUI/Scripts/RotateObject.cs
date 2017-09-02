@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DestroyObject : MonoBehaviour {
+public class RotateObject : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
 
-        //Destroy( gameObject, 2.5f );
-        //transform.Rotate( 0, 0, 10 );
+        transform.Rotate( 0, 5, 0 );
 
     }
 }
