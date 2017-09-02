@@ -180,7 +180,7 @@ public class LineRendererController : MonoBehaviour {
         //コントローラー初期化
         if ( device.GetTouchUp( SteamVR_Controller.ButtonMask.Trigger ) ) {
             Initialized( );
-            GetPosition = Vector3.zero;
+            
         }
 
         //転移処理
@@ -209,6 +209,7 @@ public class LineRendererController : MonoBehaviour {
         lineRenderer.material.color = new Color( 255, 255, 255, 100 );
         DelTime = 0f;
         Move = false;
+        GetPosition = Vector3.zero;
         Destroy( MoveTargetInstance );
     }
 
