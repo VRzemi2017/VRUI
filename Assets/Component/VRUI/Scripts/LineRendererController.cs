@@ -69,7 +69,7 @@ public class LineRendererController : MonoBehaviour {
     void Update() {
 
         //update毎にリセットする物はここに書く
-        ResetState();
+        ResetState( );
         Quaternion ControllerRotation = GetControllerRotation.transform.rotation;
 
         Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
@@ -115,7 +115,9 @@ public class LineRendererController : MonoBehaviour {
                         MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 0.1f, GetPosition.z ), Quaternion.identity );
                         MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
                     }
+
                     TimeDel( );
+
                 }
 
                 //角度の判断
@@ -162,12 +164,9 @@ public class LineRendererController : MonoBehaviour {
 
         }
 
-        //TIME初期化
+        //コントローラー初期化
         if ( device.GetTouchUp( SteamVR_Controller.ButtonMask.Trigger ) ) {
-            lineRenderer.material.color = new Color( 255, 255, 255, 100 );
-            DelTime = 0f;
-            Move = false;
-            Destroy( MoveTargetInstance );
+            Initialized( );
         }
 
         //転移処理
@@ -177,15 +176,23 @@ public class LineRendererController : MonoBehaviour {
             PointerInstance.SetActive( false );
 
             if ( DelTime >= Delay ) {
-                player.transform.position = GetPosition - new Vector3 (CameraEyePosition.x, 0, CameraEyePosition.z);
+                player.transform.position = GetPosition - new Vector3 ( CameraEyePosition.x, 0, CameraEyePosition.z );
                 isWarpInput = true;
                 DelTime = 0.0f;
                 Move = false;
             }
         }
+
         //Targetの判断
         Projectile_judge = ColliderTag(Point);
-        Debug.Log( GetPosition );
+    }
+
+
+    private void Initialized( ) {
+        lineRenderer.material.color = new Color( 255, 255, 255, 100 );
+        DelTime = 0f;
+        Move = false;
+        Destroy( MoveTargetInstance );
     }
 
     private void TimeDel( ) {

@@ -10,15 +10,14 @@ public class GemController : MonoBehaviour {
     [SerializeField] Vector3 m_SmallGemLenght;
     [SerializeField] GameObject m_LineRenderer;
     [SerializeField] float m_getGemAnimationTime;
-    [SerializeField] GameObject m_getGemAnimation;
+    [SerializeField] GameObject m_hitAnimation;
     private bool m_is_hit_gem = false;
     private bool m_is_game_start = false;
     private bool m_is_get_gem = false;
     private float m_hit_gem_time = 0;
     //ヒットしたGemを一時的に保存する
     private GameObject m_hit_gem;
-    //ヒットエフェクトを一時的に保存する
-    private GameObject m_hit_animation;
+    
 
 
     private List<GameObject> m_SmallGemList = new List<GameObject>();
@@ -39,15 +38,21 @@ public class GemController : MonoBehaviour {
             if (m_hit_gem_time >= m_getGemAnimationTime) {
                 m_is_get_gem = true;
                 m_is_hit_gem = false;
-                Destroy(m_hit_gem);
-                Destroy(m_hit_animation);
+                m_hit_gem.SetActive(false);
+                m_hitAnimation.SetActive(false);
+                Animator anim = m_hitAnimation.GetComponent<Animator>();
+                anim.SetBool("End", true);
+                anim.SetBool("Start", false);
                 m_hit_gem_time = 0.0f;
             }
         } else if (m_hit_gem_time > 0.0f) {
             m_hit_gem_time -= Time.deltaTime;
             if (m_hit_gem_time <= 0.0f) {
                 m_hit_gem_time = 0.0f;
-                Destroy(m_hit_animation);
+                m_hitAnimation.SetActive(false);
+                Animator anim = m_hitAnimation.GetComponent<Animator>();
+                anim.SetBool("End", true);
+                anim.SetBool("Start", false);
             }
         } 
     }
@@ -61,8 +66,12 @@ public class GemController : MonoBehaviour {
             case "Gem":
                 m_is_hit_gem = true;
                 m_hit_gem = collision.gameObject;
-                m_hit_animation = Instantiate(m_getGemAnimation);
-                m_hit_animation.transform.position = m_hit_gem.transform.position;
+                m_hitAnimation.SetActive(true);
+                m_hitAnimation.transform.position = m_hit_gem.transform.position;
+                SetHitAnimationSpeed(1);
+                Animator anim = m_hitAnimation.GetComponent<Animator>();
+                anim.SetBool("Start", true);
+                anim.SetBool("End", false);
                 break;
             default:
                 break;
@@ -78,13 +87,17 @@ public class GemController : MonoBehaviour {
         {
             case "Gem":
                 m_is_hit_gem = false;
-                //  m_hit_animation.GetComponent<Animator>().speed = -1;
-                Animator ano = m_hit_animation.GetComponent<Animator>();
+                SetHitAnimationSpeed(-1);
                 break;
             default:
                 break;
         }
 
+    }
+
+    private void SetHitAnimationSpeed(float spped) {
+        Animator anim = m_hitAnimation.GetComponent<Animator>();
+        anim.SetFloat("Speed", spped);
     }
 
     public void SetGemNum( int gem_num ) {
