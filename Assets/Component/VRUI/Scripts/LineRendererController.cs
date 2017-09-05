@@ -9,6 +9,8 @@ public class LineRendererController : MonoBehaviour {
     GameObject Pointer; //移動位置のTarget
     [SerializeField]
     GameObject MoveTarget;
+    [SerializeField]
+    GameObject WandEffect;
 
     [SerializeField]
     float GroundAngle = 30.0f; //角度
@@ -26,7 +28,7 @@ public class LineRendererController : MonoBehaviour {
     [SerializeField]
     float Delay = 60.0f; //転移時間
     [SerializeField]
-    float Move_quantity = 0;
+    int Move_quantity = 0;
 
     [ SerializeField]
     Vector3 PositionDiff;
@@ -47,6 +49,9 @@ public class LineRendererController : MonoBehaviour {
     Vector3 Point;
     Vector3 GetPosition = Vector3.zero;
 
+    Color LineColor;
+    Renderer renderer;
+
     float gravity_add;
 
     private GameObject PointerInstance;
@@ -56,7 +61,7 @@ public class LineRendererController : MonoBehaviour {
 
     public Vector3 TargetPoint { get { return Point; } }
     public bool IsWarpInput { get { return isWarpInput; } }
-
+    public int TeleportCount { get { return Move_quantity; } }
 
     void Start() {
 
@@ -66,19 +71,21 @@ public class LineRendererController : MonoBehaviour {
         GetControllerRotation = GameObject.Find( "Controller (right)" );
         EyeObject = GameObject.Find( "Camera (eye)" );
         PointerInstance = Instantiate( Pointer, Point, Quaternion.identity );
+        LineColor = GetComponent<Renderer>( ).material.GetColor( "_TintColor" );
+        renderer = GetComponent<Renderer>( );
     }
 
-    void Update() {
+    void Update( ) {
 
         //update毎にリセットする物はここに書く
         ResetState( );
         Quaternion ControllerRotation = GetControllerRotation.transform.rotation;
 
-        Vector3 postion = (PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
+        Vector3 postion = ( PositionDiff.magnitude * TrackedObject.transform.forward.normalized ) + TrackedObject.transform.position;
         Vector3 CameraEyePosition = EyeObject.transform.localPosition;
 
         //VRコントローラの処理
-        var device = SteamVR_Controller.Input((int)TrackedObject.index);
+        var device = SteamVR_Controller.Input( ( int )TrackedObject.index );
 
         //線とTargetの処理
         int index = 0;
@@ -87,11 +94,14 @@ public class LineRendererController : MonoBehaviour {
         Vector3 currentPosition = postion;
 
         PointerInstance.transform.position = Point;
-        
-        lineRenderer.positionCount = (int)(MaxTime / timeResolution);
+
+        lineRenderer.positionCount = ( int )( MaxTime / timeResolution );
 
         currentPosition.y = postion.y - 0.01f;
 
+        if ( device.GetPressDown( SteamVR_Controller.ButtonMask.Trigger ) ) {
+            WandEffect.SetActive( true );
+        }
 
 
         for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
@@ -186,9 +196,9 @@ public class LineRendererController : MonoBehaviour {
         //転移処理
         if ( device.GetPress( SteamVR_Controller.ButtonMask.Trigger) && MoveTargetInstance != null) {
             DelTime += Time.deltaTime;
-            lineRenderer.material.color = new Color( 0, 0, 0, 0 );
+            //lineRenderer.material.color = new Color( 0, 0, 0, 0 );
+            renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 0 ) );
             TargetSetActive = true;
-
             if ( DelTime >= Delay ) {
                 if ( Move == true ) {
                     player.transform.position = GetPosition - new Vector3( CameraEyePosition.x, 0, CameraEyePosition.z );
@@ -199,14 +209,15 @@ public class LineRendererController : MonoBehaviour {
                 }
             }
         }
-        //Debug.Log(DelTime);
         //Targetの判断
         Projectile_judge = ColliderTag(Point);
     }
 
 
     private void Initialized( ) {
-        lineRenderer.material.color = new Color( 255, 255, 255, 100 );
+        WandEffect.SetActive( false );
+        //lineRenderer.material.SetTextureScale = new Color( 255, 255, 255, 150 );
+        renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 150 ) );
         DelTime = 0f;
         Move = false;
         GetPosition = Vector3.zero;
