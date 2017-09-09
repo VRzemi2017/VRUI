@@ -54,7 +54,7 @@ public class GemController : MonoBehaviour {
                 anim.SetBool("End", true);
                 anim.SetBool("Start", false);
             }
-        } 
+        }
     }
 
     private void OnTriggerEnter(Collider collision) {
@@ -66,16 +66,18 @@ public class GemController : MonoBehaviour {
             case "Gem":
                 m_is_hit_gem = true;
                 m_hit_gem = collision.gameObject;
-                m_hitAnimation.SetActive(true);
                 m_hitAnimation.transform.position = m_hit_gem.transform.position;
+                m_hitAnimation.SetActive(true);
                 SetHitAnimationSpeed(1);
                 Animator anim = m_hitAnimation.GetComponent<Animator>();
                 anim.SetBool("Start", true);
                 anim.SetBool("End", false);
+
                 break;
             default:
                 break;
         }
+
     }
 
     private void OnTriggerExit(Collider other) {
@@ -88,6 +90,7 @@ public class GemController : MonoBehaviour {
             case "Gem":
                 m_is_hit_gem = false;
                 SetHitAnimationSpeed(-1);
+
                 break;
             default:
                 break;
