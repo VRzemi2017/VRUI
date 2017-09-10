@@ -79,6 +79,7 @@ public class GemController : MonoBehaviour {
                     Animator anim = m_hitAnimation.GetComponent<Animator>();
                     anim.SetBool("Start", true);
                     anim.SetBool("End", false);
+                    MainManager.EventTriggered( MainManager.GameEvent.EVENT_HIT_GEM );
                 }
                 m_Line_render_cont.ColorControllerOFF( );
 

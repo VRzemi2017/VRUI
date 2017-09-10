@@ -20,5 +20,4 @@ public class Gem : MonoBehaviour {
     public void SetAnimationIsEnd( bool isEnd ) {
         IsEndAnimation = isEnd;
     }
-
 }
