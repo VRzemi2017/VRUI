@@ -58,6 +58,7 @@ public class LineRendererController : MonoBehaviour {
     private GameObject MoveTargetInstance;
     private LineRenderer lineRenderer;
     private SteamVR_TrackedObject TrackedObject;
+    private bool CanTeleport;
 
     public Vector3 TargetPoint { get { return Point; } }
     public bool IsWarpInput { get { return isWarpInput; } }
@@ -104,6 +105,7 @@ public class LineRendererController : MonoBehaviour {
         }
 
 
+
         for ( float t = 0.0f; t < MaxTime; t += timeResolution ) {
 
             if ( index < lineRenderer.positionCount ) {
@@ -122,7 +124,7 @@ public class LineRendererController : MonoBehaviour {
                 //VRコントローラの処理
                 if ( device.GetPressDown( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
                     GetPosition = Point;
-                    if ( Move == false && MoveTargetInstance == null) {
+                    if ( Move == false && MoveTargetInstance == null && CanTeleport ) {
                         MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 0.1f, GetPosition.z ), Quaternion.identity );
                         MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
                     }
@@ -134,7 +136,7 @@ public class LineRendererController : MonoBehaviour {
                 if ( device.GetPress( SteamVR_Controller.ButtonMask.Trigger ) && Projectile_judge == false ) {
                     if ( GetPosition == Vector3.zero ) {
                         GetPosition = Point;
-                        if ( MoveTargetInstance == null ) {
+                        if ( MoveTargetInstance == null && CanTeleport ) {
                             MoveTargetInstance = Instantiate( MoveTarget, new Vector3( GetPosition.x, GetPosition.y + 0.1f, GetPosition.z ), Quaternion.identity );
                             MoveTargetInstance.transform.rotation = Quaternion.LookRotation( hit.normal );
                         }
@@ -194,9 +196,8 @@ public class LineRendererController : MonoBehaviour {
         }
 
         //転移処理
-        if ( device.GetPress( SteamVR_Controller.ButtonMask.Trigger) && MoveTargetInstance != null) {
+        if ( device.GetPress( SteamVR_Controller.ButtonMask.Trigger) && MoveTargetInstance != null  ) {
             DelTime += Time.deltaTime;
-            //lineRenderer.material.color = new Color( 0, 0, 0, 0 );
             renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 0 ) );
             TargetSetActive = true;
             if ( DelTime >= Delay ) {
@@ -216,12 +217,28 @@ public class LineRendererController : MonoBehaviour {
 
     private void Initialized( ) {
         WandEffect.SetActive( false );
-        //lineRenderer.material.SetTextureScale = new Color( 255, 255, 255, 150 );
-        renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 150 ) );
+        ColorControllerON( );
         DelTime = 0f;
         Move = false;
         GetPosition = Vector3.zero;
         Destroy( MoveTargetInstance );
+    }
+
+    public void ColorControllerOFF( ) {
+
+        renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 0 ) );
+        TargetSetActive = true;
+        CanTeleport = false;
+
+    }
+
+    public void ColorControllerON( ) {
+        renderer.material.SetColor( "_TintColor", new Color( LineColor.r, LineColor.g, LineColor.b, 150 ) );
+        TargetSetActive = false;
+        if ( MoveTargetInstance != null ) {
+            Destroy( MoveTargetInstance );
+        }
+        CanTeleport = true;
     }
 
     private void TimeDel( ) {

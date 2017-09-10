@@ -12,13 +12,15 @@ public class GemController : MonoBehaviour {
     [SerializeField] float m_getGemAnimationTime;
     [SerializeField] GameObject m_hitAnimation;
     private bool m_is_hit_gem = false;
+    public bool Hit_Gem { get { return m_is_hit_gem; } }
+
     private bool m_is_game_start = false;
     private bool m_is_get_gem = false;
+    private LineRendererController m_Line_render_cont;
+    private Gem Gem_tauch_data;
     private float m_hit_gem_time = 0;
     //ヒットしたGemを一時的に保存する
     private GameObject m_hit_gem;
-    
-
 
     private List<GameObject> m_SmallGemList = new List<GameObject>();
     
@@ -26,7 +28,7 @@ public class GemController : MonoBehaviour {
 
     public void Start ( ) {
         m_Gem.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[0] );
-        m_LineRenderer.GetComponent<Renderer>().material.SetColor( "_EmissionColor", m_GemColor[0] );
+        m_Line_render_cont = m_LineRenderer.GetComponent<LineRendererController>( );
     }
 
     public void Update ( ) {
@@ -44,10 +46,12 @@ public class GemController : MonoBehaviour {
                 anim.SetBool("End", true);
                 anim.SetBool("Start", false);
                 m_hit_gem_time = 0.0f;
+
             }
         } else if (m_hit_gem_time > 0.0f) {
             m_hit_gem_time -= Time.deltaTime;
             if (m_hit_gem_time <= 0.0f) {
+                m_hit_gem.GetComponent<Gem>( ).SetAnimationIsEnd( true );
                 m_hit_gem_time = 0.0f;
                 m_hitAnimation.SetActive(false);
                 Animator anim = m_hitAnimation.GetComponent<Animator>();
@@ -64,32 +68,37 @@ public class GemController : MonoBehaviour {
         //ヒットした物の種類を取得するを取得する
         switch (collision.gameObject.tag){
             case "Gem":
-                m_is_hit_gem = true;
                 m_hit_gem = collision.gameObject;
-                m_hitAnimation.transform.position = m_hit_gem.transform.position;
-                m_hitAnimation.SetActive(true);
-                SetHitAnimationSpeed(1);
-                Animator anim = m_hitAnimation.GetComponent<Animator>();
-                anim.SetBool("Start", true);
-                anim.SetBool("End", false);
+                if ( m_hit_gem.GetComponent<Gem>( ).Is_End_Animation ) {
+                    m_hit_gem.GetComponent<Gem>( ).SetAnimationIsEnd( false );
+                    m_is_hit_gem = true;                                  
+                    m_hitAnimation.transform.SetParent( null, false );
+                    m_hitAnimation.transform.position = m_hit_gem.transform.position;
+                    m_hitAnimation.SetActive(true);
+                    SetHitAnimationSpeed(1);
+                    Animator anim = m_hitAnimation.GetComponent<Animator>();
+                    anim.SetBool("Start", true);
+                    anim.SetBool("End", false);
+                }
+                m_Line_render_cont.ColorControllerOFF( );
 
                 break;
             default:
                 break;
         }
-
     }
+
 
     private void OnTriggerExit(Collider other) {
         if (!m_is_game_start) {
             return;
         }
         //ヒットした物の種類を取得するを取得する
-        switch (other.gameObject.tag)
-        {
+        switch (other.gameObject.tag) {
             case "Gem":
                 m_is_hit_gem = false;
                 SetHitAnimationSpeed(-1);
+                m_Line_render_cont.ColorControllerON( );
 
                 break;
             default:
@@ -98,9 +107,9 @@ public class GemController : MonoBehaviour {
 
     }
 
-    private void SetHitAnimationSpeed(float spped) {
+    private void SetHitAnimationSpeed(float speed) {
         Animator anim = m_hitAnimation.GetComponent<Animator>();
-        anim.SetFloat("Speed", spped);
+        anim.SetFloat("Speed", speed);
     }
 
     public void SetGemNum( int gem_num ) {
@@ -115,8 +124,6 @@ public class GemController : MonoBehaviour {
         if ( gem_num > m_GemColor.Count ) {
             return;
         }
-        m_Gem.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[gem_num] );
-        m_LineRenderer.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[gem_num] );
     }
 
     public void ResetHitState() {

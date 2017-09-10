@@ -23,6 +23,8 @@ public class PlayerManager : MonoBehaviour {
     [SerializeField] private GameObject m_Wand;
     [SerializeField] private GemController m_GemController;
 
+    private LineRendererController m_Line_render_contro;
+
     public WAND_STATE WandState { get { return m_Wand.GetComponent<WandController>().WandState; } }
     public PLAYER_STATE PlayerState { get { return m_Wand.GetComponent<WandController>().PlayerState; } }
     public int GEM_NUM { get { return m_gem_num; } }
@@ -31,6 +33,8 @@ public class PlayerManager : MonoBehaviour {
         //初期状態で動作しないものをセットをする
         m_GemController.SetGameStart(false);
         m_Wand.GetComponent<WandController>().SetBehaviorActive(false);
+        m_Line_render_contro = GameObject.Find( "Wand" ).GetComponent<LineRendererController>( );
+        //m_Line_render_contro.ColorControllerOFF( );
     }
 
     // Update is called once per frame
@@ -41,6 +45,7 @@ public class PlayerManager : MonoBehaviour {
                 //ゲームスタート時に動作するものをセットする
                 m_Wand.GetComponent<WandController>().SetBehaviorActive(true);
                 m_GemController.SetGameStart(true);
+                //m_Line_render_contro.ColorControllerON( );
                 break;
             case MainManager.GameState.GAME_PLAYING:
                 //ゲーム中のアップデート
@@ -52,6 +57,7 @@ public class PlayerManager : MonoBehaviour {
                 //ゲーム終了時に消すものはここで消す。
                 m_Wand.GetComponent<WandController>().SetBehaviorActive(false);
                 m_GemController.SetGameStart(false);
+                m_Line_render_contro.ColorControllerOFF( );
                 break;
             case MainManager.GameState.GAME_RESULT:
                 //リザルト時に消すものはここで消す。
