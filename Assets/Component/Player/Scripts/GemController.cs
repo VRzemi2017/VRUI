@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class GemController : MonoBehaviour {
     [SerializeField] GameObject m_Gem;
-    [SerializeField] List<Color> m_GemColor = new List<Color>( );
     [SerializeField] GameObject m_SmallGemPrefab;
     [SerializeField] Transform m_SmallGemParent;
     [SerializeField] Vector3 m_SmallGemLenght;
@@ -27,7 +26,6 @@ public class GemController : MonoBehaviour {
     public bool IsGetGem { get { return m_is_get_gem; } }
 
     public void Start ( ) {
-        m_Gem.GetComponent<Renderer>( ).material.SetColor( "_EmissionColor", m_GemColor[0] );
         m_Line_render_cont = m_LineRenderer.GetComponent<LineRendererController>( );
     }
 
@@ -38,9 +36,11 @@ public class GemController : MonoBehaviour {
         if (m_is_hit_gem){
             m_hit_gem_time += Time.deltaTime;
             if (m_hit_gem_time >= m_getGemAnimationTime) {
+
+                m_hit_gem.transform.localScale = new Vector3( 0.2f, 0.2f, 0.2f );
+
                 m_is_get_gem = true;
                 m_is_hit_gem = false;
-                m_hit_gem.SetActive(false);
                 m_hitAnimation.SetActive(false);
                 Animator anim = m_hitAnimation.GetComponent<Animator>();
                 anim.SetBool("End", true);
@@ -113,16 +113,12 @@ public class GemController : MonoBehaviour {
     }
 
     public void SetGemNum( int gem_num ) {
-        GameObject gem = Instantiate( m_SmallGemPrefab );
+        GameObject gem = m_hit_gem;
         gem.transform.SetParent( m_SmallGemParent, false );
         m_SmallGemList.Add( gem );
         for ( int i = 0; i < m_SmallGemList.Count; i++ ) {
             Vector3 position = Quaternion.Euler(0, 0, ( 360 / m_SmallGemList.Count) * i ) * m_SmallGemLenght;
             m_SmallGemList[i].transform.localPosition = position;
-        }
-
-        if ( gem_num > m_GemColor.Count ) {
-            return;
         }
     }
 
